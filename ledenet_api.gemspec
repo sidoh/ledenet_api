@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Christopher Mullins"]
   spec.email         = ["chris@sidoh.org"]
 
-  spec.summary       = %q{An API to control the LEDENET Magic UFO LED WiFi Controller}
+  spec.summary       = %q{An API for the LEDENET Magic UFO LED WiFi Controller}
   spec.homepage      = "http://www.github.com/sidoh/ledenet_api"
   spec.license       = "MIT"
 
