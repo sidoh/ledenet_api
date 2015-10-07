@@ -46,7 +46,7 @@ module LEDENET
           #                         R   G   B                 ^--- LSB indicates on/off
           flush_response(14)
         rescue Errno::EPIPE
-          create_socket
+          reconnect!
           retry
         end
       end
@@ -60,6 +60,9 @@ module LEDENET
 
         begin
           @socket.write(b.pack('c*'))
+        rescue Errno::EPIPE
+          reconnect!
+          retry
         end
       end
 
