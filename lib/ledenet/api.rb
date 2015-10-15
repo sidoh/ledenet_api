@@ -43,7 +43,7 @@ module LEDENET
 
           # Example response:
           # [129, 4, 35, 97, 33, 9, 11, 22, 33, 255, 3, 0, 0, 119]
-          #                         R   G   B                 ^--- LSB indicates on/off
+          #                         R   G   B   WW            ^--- LSB indicates on/off
           flush_response(14)
         rescue Errno::EPIPE
           reconnect!

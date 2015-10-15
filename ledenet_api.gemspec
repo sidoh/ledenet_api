@@ -1,12 +1,11 @@
 # coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+$:.push File.expand_path('../lib', __FILE__)
 
-require 'ledenet_api'
+require "ledenet/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "ledenet_api"
-  spec.version       = LEDENETApi::VERSION
+  spec.version       = LEDENET::VERSION
   spec.authors       = ["Christopher Mullins"]
   spec.email         = ["chris@sidoh.org"]
 
