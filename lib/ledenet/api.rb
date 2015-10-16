@@ -67,6 +67,7 @@ module LEDENET
       end
 
       def create_socket
+        @socket.close unless @socket.nil?
         @socket = TCPSocket.new(@device_address, API_PORT)
       end
   end
