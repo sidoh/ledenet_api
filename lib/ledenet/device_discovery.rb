@@ -14,6 +14,11 @@ module LEDENET
     end
   end
 
+  DEFAULT_OPTIONS = {
+      expected_devices: 1,
+      timeout: 5
+  }
+
   # The WiFi controllers these things appear to use support a discovery protocol
   # roughly outlined here: http://www.usriot.com/Faq/49.html
   #
@@ -21,7 +26,9 @@ module LEDENET
   # containing IP address, hardware address, and model number. The model number
   # appears to correspond to the WiFi controller, and not the LED controller
   # itself.
-  def self.discover_devices(expected_devices = 1, timeout = 5)
+  def self.discover_devices(options = {})
+    options = DEFAULT_OPTIONS.merge(options)
+
     send_addr = ['<broadcast>', 48899]
     send_socket = UDPSocket.new
     send_socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_BROADCAST, true)
@@ -30,12 +37,12 @@ module LEDENET
     discovered_devices = []
 
     begin
-      Timeout::timeout(timeout) do
+      Timeout::timeout(options[:timeout]) do
         while true
           data = send_socket.recv(1024)
           discovered_devices.push(LEDENET::Device.new(data))
 
-          raise Timeout::Error if discovered_devices.count >= expected_devices
+          raise Timeout::Error if discovered_devices.count >= options[:expected_devices]
         end
       end
     rescue Timeout::Error
