@@ -42,7 +42,7 @@ module LEDENET
           data = send_socket.recv(1024)
           discovered_devices.push(LEDENET::Device.new(data))
 
-          raise Timeout::Error if discovered_devices.count < options[:expected_devices]
+          raise Timeout::Error if discovered_devices.count >= options[:expected_devices]
         end
       end
     rescue Timeout::Error
