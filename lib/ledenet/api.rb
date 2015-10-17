@@ -2,16 +2,21 @@ module LEDENET
   class Api
     API_PORT = 5577
 
-    def initialize(device_address)
+    DEFAULT_OPTIONS = {
+        reuse_connection: false
+    }
+
+    def initialize(device_address, options = {})
       @device_address = device_address
+      @options = DEFAULT_OPTIONS.merge(options)
     end
 
     def on
-      send_bytes(0x71, 0x23, 0x0F, 0xA3)
+      send_bytes_action(0x71, 0x23, 0x0F, 0xA3)
     end
 
     def off
-      send_bytes(0x71, 0x24 ,0x0F, 0xA4)
+      send_bytes_action(0x71, 0x24 ,0x0F, 0xA4)
     end
 
     def on?
@@ -21,7 +26,7 @@ module LEDENET
     def update_color(r, g, b)
       checksum = color_checksum(r, g, b)
 
-      send_bytes(0x31, r, g, b, 0xFF, 0, 0x0F, checksum)
+      send_bytes_action(0x31, r, g, b, 0xFF, 0, 0x0F, checksum)
     end
 
     def current_color
@@ -38,16 +43,13 @@ module LEDENET
       end
 
       def status
-        begin
+        socket_action do
           send_bytes(0x81, 0x8A, 0x8B, 0x96)
 
           # Example response:
           # [129, 4, 35, 97, 33, 9, 11, 22, 33, 255, 3, 0, 0, 119]
           #                         R   G   B   WW            ^--- LSB indicates on/off
           flush_response(14)
-        rescue Errno::EPIPE
-          reconnect!
-          retry
         end
       end
 
@@ -56,19 +58,28 @@ module LEDENET
       end
 
       def send_bytes(*b)
-        create_socket if @socket.nil?
+        @socket.write(b.pack('c*'))
+      end
 
-        begin
-          @socket.write(b.pack('c*'))
-        rescue Errno::EPIPE
-          reconnect!
-          retry
-        end
+      def send_bytes_action(*b)
+        socket_action { send_bytes(*b) }
       end
 
       def create_socket
-        @socket.close unless @socket.nil?
+        @socket.close unless @socket.nil? or @socket.closed?
         @socket = TCPSocket.new(@device_address, API_PORT)
+      end
+
+      def socket_action
+        begin
+          create_socket if @socket.nil? or @socket.closed?
+          yield
+        rescue Errno::EPIPE, IOError
+          reconnect!
+          retry
+        ensure
+          @socket.close unless @socket.closed? or @options[:reuse_connection]
+        end
       end
   end
 end
