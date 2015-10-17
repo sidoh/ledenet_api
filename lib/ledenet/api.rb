@@ -32,6 +32,8 @@ module LEDENET
       checksum = color_checksum(r, g, b)
 
       send_bytes_action(0x31, r, g, b, 0xFF, 0, 0x0F, checksum)
+
+      true
     end
 
     def current_color
