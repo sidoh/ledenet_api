@@ -3,7 +3,8 @@ module LEDENET
     API_PORT = 5577
 
     DEFAULT_OPTIONS = {
-        reuse_connection: false
+        reuse_connection: false,
+        max_retries: 3
     }
 
     def initialize(device_address, options = {})
@@ -71,12 +72,19 @@ module LEDENET
       end
 
       def socket_action
+        tries = 0
         begin
           create_socket if @socket.nil? or @socket.closed?
           yield
-        rescue Errno::EPIPE, IOError
-          reconnect!
-          retry
+        rescue Errno::EPIPE, IOError => e
+          tries += 1
+
+          if tries <= @options[:max_retries]
+            reconnect!
+            retry
+          else
+            raise e
+          end
         ensure
           @socket.close unless @socket.closed? or @options[:reuse_connection]
         end

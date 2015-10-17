@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ledenet_api (0.1.1)
+    ledenet_api (0.1.2)
 
 GEM
   remote: https://rubygems.org/
