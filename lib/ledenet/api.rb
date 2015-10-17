@@ -14,10 +14,14 @@ module LEDENET
 
     def on
       send_bytes_action(0x71, 0x23, 0x0F, 0xA3)
+
+      true
     end
 
     def off
       send_bytes_action(0x71, 0x24 ,0x0F, 0xA4)
+
+      true
     end
 
     def on?
