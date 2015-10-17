@@ -34,6 +34,13 @@ devices.first.ip
 => "10.133.8.113"
 ```
 
+By deafult, `discover_devices` waits for up to 5 seconds for a single device to respond, and returns immediately after finding one. To change this behavior:
+
+```ruby
+irb(main):005:0> LEDENET.discover_devices(expected_devices: 2, timeout: 1)
+=> [#<LEDENET::Device:0x007fff328f4330 @ip="10.133.8.113", @hw_addr="XXXXXXXXXXXX", @model="HF-LPB100-ZJ200">]
+```
+
 ### API
 
 To construct an API class, use the following:
