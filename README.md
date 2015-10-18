@@ -63,7 +63,7 @@ api = LEDENET::Api.new('10.133.8.113', reuse_connection: true, max_retries: 0)
 
 ### Status
 
-To check if the controller is current on:
+To check if the controller is currently on:
 
 ```ruby
 api.on?
