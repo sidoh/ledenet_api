@@ -91,7 +91,7 @@ api.current_color
 To set the color:
 
 ```ruby
-irb(main):016:0> api.update_color(255, 0, 255)
+api.update_color(255, 0, 255)
 => true
 ```
 
