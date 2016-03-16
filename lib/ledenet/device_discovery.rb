@@ -47,8 +47,11 @@ module LEDENET
           data = send_socket.recv(1024)
 
           device = LEDENET::Device.new(data)
-          discovered_devices.push(device)
-          discovered_models.add(device.model)
+
+          if device.ip and device.hw_addr and device.model
+            discovered_devices.push(device)
+            discovered_models.add(device.model)
+          end
         end
       end
     rescue Timeout::Error
