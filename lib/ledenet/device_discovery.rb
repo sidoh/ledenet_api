@@ -1,5 +1,6 @@
 require 'socket'
 require 'timeout'
+require 'set'
 
 module LEDENET
   class Device
@@ -16,7 +17,8 @@ module LEDENET
 
   DEFAULT_OPTIONS = {
       expected_devices: 1,
-      timeout: 5
+      timeout: 5,
+      expected_models: []
   }
 
   # The WiFi controllers these things appear to use support a discovery protocol
@@ -35,14 +37,18 @@ module LEDENET
     send_socket.send('HF-A11ASSISTHREAD', 0, send_addr[0], send_addr[1])
 
     discovered_devices = []
+    discovered_models = Set.new
+    expected_models = Set.new(options[:expected_models])
 
     begin
       Timeout::timeout(options[:timeout]) do
-        while true
+        while discovered_devices.count < options[:expected_devices] or
+              !expected_models.subset?(discovered_models)
           data = send_socket.recv(1024)
-          discovered_devices.push(LEDENET::Device.new(data))
 
-          raise Timeout::Error if discovered_devices.count >= options[:expected_devices]
+          device = LEDENET::Device.new(data)
+          discovered_devices.push(device)
+          discovered_models.add(device.model)
         end
       end
     rescue Timeout::Error
