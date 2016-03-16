@@ -92,7 +92,7 @@ module LEDENET
             raise e
           end
         ensure
-          @socket.close unless @socket.closed? or @options[:reuse_connection]
+          @socket.close unless @socket.nil? or @socket.closed? or @options[:reuse_connection]
         end
       end
   end
