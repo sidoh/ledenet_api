@@ -1,3 +1,3 @@
 module LEDENET
-  VERSION = '0.1.11'
+  VERSION = '1.0.0'
 end

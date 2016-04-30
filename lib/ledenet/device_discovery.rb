@@ -18,7 +18,8 @@ module LEDENET
   DEFAULT_OPTIONS = {
       expected_devices: 1,
       timeout: 5,
-      expected_models: []
+      expected_models: [],
+      udp_port: 48899
   }
 
   # The WiFi controllers these things appear to use support a discovery protocol
@@ -31,7 +32,7 @@ module LEDENET
   def self.discover_devices(options = {})
     options = DEFAULT_OPTIONS.merge(options)
 
-    send_addr = ['<broadcast>', 48899]
+    send_addr = ['<broadcast>', options[:udp_port]]
     send_socket = UDPSocket.new
     send_socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_BROADCAST, true)
     send_socket.send('HF-A11ASSISTHREAD', 0, send_addr[0], send_addr[1])
