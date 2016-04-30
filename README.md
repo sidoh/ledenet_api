@@ -74,27 +74,34 @@ To turn the controller on and off:
 
 ```ruby
 api.on
-=> true
 api.off
-=> true
 ```
 
-### Color
+### Color / Warm White
 
-To get the current color setting (as an array of RGB values):
+To get the current color settings:
 
 ```ruby
-api.current_color
-=> [10, 10, 10]
+api.current_color_data
+#=> {:red=>255, :green=>255, :blue=>255, :warm_white=>255}
+api.current_rgb
+#=> [255, 255, 255]
+api.current_warm_white
+#=> 255
 ```
 
 To set the color:
 
 ```ruby
-api.update_color(255, 0, 255)
-=> true
+api.update_rgb(255, 0, 255)
+
+api.update_warm_white(100)
 ```
 
-### Warm White
+You can also update individual parameters:
 
-This controller is also capable of controling Warm White (WW) LEDs. I didn't have a strip to test, but I'm pretty sure I found out how to control it. If this would be useful to you, please open an issue/pull request.
+```ruby
+api.update_color_data(red: 100)
+
+api.update_color_data(blue: 255, warm_white: 0)
+```
