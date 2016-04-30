@@ -36,7 +36,7 @@ module LEDENET
     end
 
     def update_color_data(o)
-      updated_data = current_color.merge(o)
+      updated_data = current_color_data.merge(o)
       send_packet(LEDENET::Packets::UpdateColorRequest.new(updated_data))
     end
 
