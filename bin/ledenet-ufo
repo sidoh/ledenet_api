@@ -68,7 +68,7 @@ end
 
 opts.parse!
 
-if options[:print_help?]
+if options[:print_help?] || options.empty?
   puts opts
   exit 0
 end
