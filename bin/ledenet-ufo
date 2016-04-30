@@ -53,7 +53,7 @@ opts = OptionParser.new do |opts|
     options[:on?] = false
   end
 
-  opts.on("-l", "--list", Integer, "Prints a list of available devices and exists") do |v|
+  opts.on("-l", "--list", Integer, "Prints a list of available devices and exits") do |v|
     options[:list] = true
   end
 
