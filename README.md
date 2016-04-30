@@ -22,7 +22,63 @@ gem 'ledenet_api'
 
 ## Using it
 
-### Device discovery
+In addition to the Ruby API, this gem also comes bundled with an executable named `ledenet-ufo`.
+
+### Commandline
+
+Here's the `--help` message:
+
+```
+$ ledenet-ufo
+  Usage: ledenet-ufo --list
+     OR: ledenet-ufo [IP|HW ADDR] [OPTIONS]
+
+    -r, --red [VALUE]                Set red to VALUE
+    -g, --green [VALUE]              Set green to VALUE
+    -b, --blue [VALUE]               Set blue to VALUE
+    -w, --warm-white [VALUE]         Set warm white to VALUE
+        --on                         Turn on the controller
+        --off                        Turn off the controller
+    -l, --list                       Prints a list of available devices and exists
+    -s, --status                     Prints status as JSON
+    -h, --help                       Prints this help message
+```
+
+When using it, you can specify the IP address, hardware (mac) address, or let `ledenet_api` choose an arbitrary device on the local network (this would work well if you only have one).
+
+Examples:
+
+#### List available devices
+
+```
+$ ledenet-ufo --list
+      IP ADDRESS         HW ADDRESS              Model #
+    10.133.8.113       XXXXXXXXXXXX      HF-LPB100-ZJ200
+```
+
+#### Get current status
+
+```
+$ ledenet-ufo -s
+{"red":"255","green":"255","blue":"255","warm_white":"255","is_on":true}
+```
+
+#### Turn on, adjust colors
+
+```
+$ ledenet-ufo --on -r 200 -g 0 -b 255 --warm-white 0 --status
+{"red":"200","green":"0","blue":"255","warm_white":"255","is_on":true}
+```
+
+#### Turn off
+
+```
+$ ledenet-ufo --off
+```
+
+### Ruby API
+
+#### Device discovery
 
 These devices implement a service discovery protocol, which allows you to find them on your network without digging for their IP address. To use it:
 
@@ -41,7 +97,7 @@ irb(main):005:0> LEDENET.discover_devices(expected_devices: 2, timeout: 1)
 => [#<LEDENET::Device:0x007fff328f4330 @ip="10.133.8.113", @hw_addr="XXXXXXXXXXXX", @model="HF-LPB100-ZJ200">]
 ```
 
-### API
+#### API
 
 To construct an API class, use the following:
 
@@ -61,7 +117,7 @@ By default, the API will re-try transient-looking failures three times. You can 
 api = LEDENET::Api.new('10.133.8.113', reuse_connection: true, max_retries: 0)
 ```
 
-### Status
+#### Status
 
 To check if the controller is currently on:
 
@@ -77,7 +133,7 @@ api.on
 api.off
 ```
 
-### Color / Warm White
+#### Color / Warm White
 
 To get the current color settings:
 
