@@ -1,0 +1,121 @@
+#!/usr/bin/ruby
+
+require 'optparse'
+require 'json'
+
+require 'ledenet_api'
+require 'ipaddress'
+
+options = {}
+
+banner = <<-BANNER
+  Usage: ledenet-ufo --list
+     OR: ledenet-ufo [IP|HW ADDR] [OPTIONS]
+
+BANNER
+
+if ARGV.count > 0 && !ARGV.first.start_with?('-')
+  arg = ARGV.shift
+
+  if IPAddress.valid?(arg)
+    options[:ip] = arg
+  elsif /^([0-9a-fA-F]{2}[:-]){5}[0-9a-fA-F]{2}$/i.match(arg)
+    options[:hw_addr] = arg
+  else
+    raise "Invalid device speicifier \"#{arg}\". Must be ip or mac address."
+  end
+end
+
+opts = OptionParser.new do |opts|
+  opts.banner = banner
+
+  opts.on("-r", "--red [VALUE]", Integer, "Set red to VALUE") do |v|
+    options[:red] = v
+  end
+
+  opts.on("-g", "--green [VALUE]", Integer, "Set green to VALUE") do |v|
+    options[:green] = v
+  end
+
+  opts.on("-b", "--blue [VALUE]", Integer, "Set blue to VALUE") do |v|
+    options[:blue] = v
+  end
+
+  opts.on("-w", "--warm-white [VALUE]", Integer, "Set warm white to VALUE") do |v|
+    options[:warm_white] = v
+  end
+
+  opts.on("--on", "Turn on the controller") do |v|
+    options[:on?] = true
+  end
+
+  opts.on("--off", "Turn off the controller") do
+    options[:on?] = false
+  end
+
+  opts.on("-l", "--list", Integer, "Prints a list of available devices and exists") do |v|
+    options[:list] = true
+  end
+
+  opts.on("-s", "--status", "Prints status as JSON") do |v|
+    options[:print_status?] = true
+  end
+
+  opts.on("-h", "--help", "Prints this help message") do
+    options[:print_help?] = true
+  end
+end
+
+opts.parse!
+
+if options[:print_help?]
+  puts opts
+  exit 0
+end
+
+begin
+  if options[:list]
+    if options.count > 1
+      warn "--list is incompatible with other options!\n\n"
+      warn opts
+      exit 1
+    end
+
+    devices = LEDENET.discover_devices(expected_devices: 1000)
+
+    row_format = "%16s %18s %20s\n"
+    printf row_format, "IP ADDRESS", "HW ADDRESS", "Model #"
+
+    LEDENET.discover_devices.each do |device|
+      printf row_format, device.ip, device.hw_addr, device.model
+    end
+  else
+    ip = nil
+    if options[:ip]
+      ip = options[:ip]
+    elsif options[:hw_addr]
+      r = LEDENET.discover_devices.select { |x| x.hw_addr == options[:hw_addr] }
+      if r.empty?
+        raise "Couldn't find device with mac addr: #{options[:hw_addr]}"
+      end
+      ip = r.first.ip
+    else
+      ip = LEDENET.discover_devices.first.ip
+    end
+
+    api = LEDENET::Api.new(ip)
+
+    api.set_power(options[:on?]) unless options[:on?].nil?
+    api.update_color_data(options.select { |k,_| %w{red green blue warm_white}.include?(k.to_s) })
+
+    if options[:print_status?]
+      status = api.current_color_data
+      status = status.merge(is_on: api.on?)
+
+      puts status.to_json
+    end
+  end
+rescue Exception => e
+  puts "Error: #{e}"
+  puts e.backtrace.join("\n")
+end

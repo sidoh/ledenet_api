@@ -23,6 +23,10 @@ module LEDENET
       send_packet(LEDENET::Packets::SetPowerRequest.off_request)
     end
 
+    def set_power(v)
+      v ? on : off
+    end
+
     def on?
       status.on?
     end

@@ -1,14 +1,16 @@
 PATH
   remote: .
   specs:
-    ledenet_api (0.1.11)
-      bindata (>= 1.8)
+    ledenet_api (1.1.0)
+      bindata (>= 2.3)
+      ipaddress (>= 0.8)
 
 GEM
   remote: https://rubygems.org/
   specs:
     bindata (2.3.0)
     diff-lcs (1.2.5)
+    ipaddress (0.8.3)
     rake (10.4.2)
     rspec (3.3.0)
       rspec-core (~> 3.3.0)
