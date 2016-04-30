@@ -20,7 +20,7 @@ if ARGV.count > 0 && !ARGV.first.start_with?('-')
   if IPAddress.valid?(arg)
     options[:ip] = arg
   elsif /^([0-9a-fA-F]{2}[:-]){5}[0-9a-fA-F]{2}$/i.match(arg)
-    options[:hw_addr] = arg
+    options[:hw_addr] = arg.gsub(':', '').upcase
   else
     raise "Invalid device speicifier \"#{arg}\". Must be ip or mac address."
   end
@@ -87,7 +87,12 @@ begin
     printf row_format, "IP ADDRESS", "HW ADDRESS", "Model #"
 
     LEDENET.discover_devices.each do |device|
-      printf row_format, device.ip, device.hw_addr, device.model
+      formatted_hwaddr = (0...12).step(2)
+        .map { |x| device.hw_addr[x, 2] }
+        .join(':')
+        .downcase
+
+      printf row_format, device.ip, formatted_hwaddr, device.model
     end
   else
     ip = nil
