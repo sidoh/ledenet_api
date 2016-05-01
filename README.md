@@ -61,15 +61,15 @@ $ ledenet-ufo --list
 #### Get current status
 
 ```
-$ ledenet-ufo -s
-{"red":"255","green":"255","blue":"255","warm_white":"255","is_on":true}
+$ ledenet-ufo --status
+{"is_on":true,"red":"255","green":"255","blue":"255","warm_white":"255","running_function?":false,"speed":61,"speed_packet_value":"12","function_name":"NO_FUNCTION","function_id":"97"}
 ```
 
 #### Turn on, adjust colors
 
 ```
 $ ledenet-ufo --on -r 200 -g 0 -b 255 --warm-white 0 --status
-{"red":"200","green":"0","blue":"255","warm_white":"255","is_on":true}
+{"is_on":true,"red":"200","green":"0","blue":"255","warm_white":"0","running_function?":false,"speed":99,"speed_packet_value":"0","function_name":"NO_FUNCTION","function_id":"97"}
 ```
 
 #### Turn off
@@ -81,7 +81,8 @@ $ ledenet-ufo --off
 #### Set function
 
 ```
-$ ledenet-ufo --function seven_color_cross_fade --speed 10
+$ ledenet-ufo --speed 60 --function seven_color_cross_fade --status
+{"is_on":true,"red":"255","green":"0","blue":"0","warm_white":"255","running_function?":true,"speed":61,"speed_packet_value":"12","function_name":"SEVEN_COLOR_CROSS_FADE","function_id":"37"}
 ```
 
 ### Ruby API
@@ -183,9 +184,13 @@ LEDENET::Functions.all_functions
 fn = LEDENET::Functions::SEVEN_COLOR_CROSS_FADE
 speed = 0 # very slow
 
-api.update_function(fn, speed)
+api.update_function(fn)
+api.update_function_speed(100) #very fast
 
-api.update_function(:blue_green_cross_fade, 100) # Very fast
+api.update_function_data(
+  function_id: LEDENET::Functions::BLUE_GREEN_CROSS_FADE,
+  speed: 50
+)
 ```
 
 To quit the function and return to a constant color, simply update a color value:
