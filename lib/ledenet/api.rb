@@ -127,9 +127,7 @@ module LEDENET
       end
 
       def request_status
-        s = send_packet(LEDENET::Packets::StatusRequest.new)
-        puts s.inspect
-        s
+        send_packet(LEDENET::Packets::StatusRequest.new)
       end
 
       def create_socket
