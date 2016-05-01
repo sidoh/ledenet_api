@@ -39,9 +39,11 @@ $ ledenet-ufo
     -w, --warm-white [VALUE]         Set warm white to VALUE
         --on                         Turn on the controller
         --off                        Turn off the controller
-    -l, --list                       Prints a list of available devices and exists
+    -l, --list                       Prints a list of available devices and exits
     -s, --status                     Prints status as JSON
     -h, --help                       Prints this help message
+        --function-id [VALUE]        Set function id to VALUE
+    -f, --function [VALUE]           Set function to VALUE.
 ```
 
 When using it, you can specify the IP address, hardware (mac) address, or let `ledenet_api` choose an arbitrary device on the local network (this would work well if you only have one).
@@ -74,6 +76,12 @@ $ ledenet-ufo --on -r 200 -g 0 -b 255 --warm-white 0 --status
 
 ```
 $ ledenet-ufo --off
+```
+
+#### Set function
+
+```
+$ ledenet-ufo --function seven_color_cross_fade --speed 10
 ```
 
 ### Ruby API
@@ -160,4 +168,28 @@ You can also update individual parameters:
 api.update_color_data(red: 100)
 
 api.update_color_data(blue: 255, warm_white: 0)
+```
+
+#### Functions
+
+The UFO devices ship with 20 pre-programmed lighting functions. ledenet_api has support for these:
+
+```ruby
+LEDENET::Functions.all_functions
+#=> [:SEVEN_COLOR_CROSS_FADE, :RED_GRADUAL_CHANGE, :GREEN_GRADUAL_CHANGE, :BLUE_GRADUAL_CHANGE, :YELLOW_GRADUAL_CHANGE, :CYAN_GRADUAL_CHANGE, :PURPLE_GRADUAL_CHANGE, :WHITE_GRADUAL_CHANGE, :RED_GREEN_CROSS_FADE, :RED_BLUE_CROSS_FADE, :SEVEN_COLOR_STROBE_FLASH, :RED_STROBE_FLASH, :GREEN_STROBE_FLASH, :BLUE_STROBE_FLASH, :YELLOW_STROBE_FLASH, :CYAN_STROBE_FLASH, :PURPLE_STROBE_FLASH, :WHITE_STROBE_FLASH, :SEVEN_COLOR_JUMPING_CHANGE, :GREEN_BLUE_CROSS_FADE]
+```
+
+```ruby
+fn = :seven_color_cross_fade
+speed = 0 # very slow
+
+api.update_function(fn, speed)
+
+api.update_function(fn, 100) # Very fast
+```
+
+To quit the function and return to a constant color, simply update a color value:
+
+```ruby
+api.update_color_data(warm_white: 255)
 ```
