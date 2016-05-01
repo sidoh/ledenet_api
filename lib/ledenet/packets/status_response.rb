@@ -4,7 +4,7 @@ require 'ledenet/packets/fields/checksum'
 
 module LEDENET::Packets
   class StatusResponse < BinData::Record
-    hide :checksum, :unused_payload
+    hide :checksum
 
     uint8 :packet_id, value: 0x81
     uint8 :device_name
@@ -21,7 +21,7 @@ module LEDENET::Packets
     uint8 :blue
     uint8 :warm_white
 
-    uint16be :unused_payload, value: 0x0000
+    uint16be :unused_payload
     uint8 :checksum
 
     def on?

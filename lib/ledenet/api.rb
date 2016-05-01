@@ -1,6 +1,7 @@
 require 'ledenet/packets/set_power_request'
 require 'ledenet/packets/status_request'
 require 'ledenet/packets/update_color_request'
+require 'ledenet/packets/set_function_request'
 
 module LEDENET
   class Api
@@ -58,6 +59,14 @@ module LEDENET
         [x.to_sym, status_response.send(x)]
       end
       Hash[color_data]
+    end
+
+    def update_function(fn, speed)
+      if fn.is_a?(String) or fn.is_a?(Symbol)
+        fn = LEDENET::Functions.const_get(fn.upcase)
+      end
+
+      send_packet(LEDENET::Packets::SetFunctionRequest.new(function_id: fn, speed: speed))
     end
 
     def reconnect!

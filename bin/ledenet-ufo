@@ -53,7 +53,7 @@ opts = OptionParser.new do |opts|
     options[:on?] = false
   end
 
-  opts.on("-l", "--list", Integer, "Prints a list of available devices and exits") do |v|
+  opts.on("-l", "--list", "Prints a list of available devices and exits") do |v|
     options[:list] = true
   end
 
@@ -64,6 +64,24 @@ opts = OptionParser.new do |opts|
   opts.on("-h", "--help", "Prints this help message") do
     options[:print_help?] = true
   end
+
+  opts.on("--function-id [VALUE]", Integer, "Set function id to VALUE") do |v|
+    options[:function] = v
+  end
+
+  opts.on("-f", "--function [VALUE]", "Set function to VALUE.") do |v|
+    if !LEDENET::Functions.const_defined?(v)
+      warn "Unknown function type: #{v}. Valid function types: \n\t" <<
+           "#{LEDENET::Functions.all_functions.join("\n\t")}"
+      exit 1
+    end
+
+    options[:function] = LEDENET::Functions.const_get(v)
+  end
+
+  opts.on("-p", "--speed [VALUE]", Integer, "Set function speed to VALUE") do |v|
+    options[:speed] = v
+  end
 end
 
 opts.parse!
@@ -73,14 +91,20 @@ if options[:print_help?] || options.empty?
   exit 0
 end
 
+if options[:list] && options.count > 1
+  warn "--list is incompatible with other options!\n\n"
+  warn opts
+  exit 1
+end
+
+if options[:function].nil? != options[:speed].nil?
+  warn "--funciton and --speed must be specified together. You provide " <<
+       "one without also providing the other."
+  exit 1
+end
+
 begin
   if options[:list]
-    if options.count > 1
-      warn "--list is incompatible with other options!\n\n"
-      warn opts
-      exit 1
-    end
-
     devices = LEDENET.discover_devices(expected_devices: 1000)
 
     row_format = "%16s %18s %20s\n"
@@ -111,7 +135,15 @@ begin
     api = LEDENET::Api.new(ip)
 
     api.set_power(options[:on?]) unless options[:on?].nil?
-    api.update_color_data(options.select { |k,_| %w{red green blue warm_white}.include?(k.to_s) })
+
+    color_params = options.select do |k,_|
+      %w{red green blue warm_white}.include?(k.to_s)
+    end
+    api.update_color_data(color_params) unless color_params.empty?
+
+    if options[:function] && options[:speed]
+      api.update_function(options[:function], options[:speed])
+    end
 
     if options[:print_status?]
       status = api.current_color_data
