@@ -16,6 +16,13 @@ module LEDENET
       @options = DEFAULT_OPTIONS.merge(options)
     end
 
+    def status
+      response = request_status
+      status = { is_on: on?(response) }
+      status.merge!(current_color_data(response))
+      status.merge!(current_function_data(response))
+    end
+
     def on
       send_packet(LEDENET::Packets::SetPowerRequest.on_request)
     end
@@ -28,8 +35,8 @@ module LEDENET
       v ? on : off
     end
 
-    def on?
-      status.on?
+    def on?(response = request_status)
+      response.on?
     end
 
     def update_rgb(r, g, b)
@@ -53,20 +60,47 @@ module LEDENET
       current_color_data[:warm_white]
     end
 
-    def current_color_data
-      status_response = status
-      color_data = %w{red green blue warm_white}.map do |x|
-        [x.to_sym, status_response.send(x)]
-      end
-      Hash[color_data]
+    def current_color_data(response = request_status)
+      select_status_keys(response, *%w{red green blue warm_white})
     end
 
-    def update_function(fn, speed)
+    def update_function(fn)
       if fn.is_a?(String) or fn.is_a?(Symbol)
         fn = LEDENET::Functions.const_get(fn.upcase)
       end
+      update_function_data(function_id: fn)
+    end
 
-      send_packet(LEDENET::Packets::SetFunctionRequest.new(function_id: fn, speed: speed))
+    def update_function_speed(s)
+      update_function_data(speed: s)
+    end
+
+    def update_function_data(o)
+      o = {}.merge(o)
+      current_data = current_function_data
+      updated_data = {
+        function_id: current_data[:function_id],
+        speed: current_data[:speed_packet_value]
+      }
+
+      if o[:speed]
+        speed = LEDENET::FunctionSpeed.from_value(o.delete(:speed))
+        updated_data[:speed] = speed.packet_value
+      end
+      updated_data.merge!(o)
+
+      send_packet(LEDENET::Packets::SetFunctionRequest.new(updated_data))
+    end
+
+    def current_function_data(response = request_status)
+      raw_function_data = select_status_keys(response, *%w{mode speed})
+      function_data = {
+        running_function?: raw_function_data[:mode] != LEDENET::Functions::NO_FUNCTION,
+        speed: FunctionSpeed.from_packet_value(raw_function_data[:speed]).value,
+        speed_packet_value: raw_function_data[:speed],
+        function_name: LEDENET::Functions.value_of(raw_function_data[:mode]),
+        function_id: raw_function_data[:mode]
+      }
     end
 
     def reconnect!
@@ -85,8 +119,17 @@ module LEDENET
     end
 
     private
-      def status
-        send_packet(LEDENET::Packets::StatusRequest.new)
+      def select_status_keys(status_response, *keys)
+        color_data = keys.map do |x|
+          [x.to_sym, status_response.send(x)]
+        end
+        Hash[color_data]
+      end
+
+      def request_status
+        s = send_packet(LEDENET::Packets::StatusRequest.new)
+        puts s.inspect
+        s
       end
 
       def create_socket

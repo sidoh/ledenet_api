@@ -20,11 +20,16 @@ module LEDENET
       CYAN_STROBE_FLASH = 0x35,
       PURPLE_STROBE_FLASH = 0x36,
       WHITE_STROBE_FLASH = 0x37,
-      SEVEN_COLOR_JUMPING_CHANGE = 0x38
+      SEVEN_COLOR_JUMPING_CHANGE = 0x38,
+      NO_FUNCTION = 0x61
     ]
 
     def self.all_functions
       LEDENET::Functions.constants.reject { |x| x == :VALUES }
+    end
+
+    def self.value_of(i)
+      all_functions.select { |x| self.const_get(x) == i }.first
     end
   end
 end

@@ -99,12 +99,6 @@ if options[:list] && options.count > 1
   exit 1
 end
 
-if options[:function].nil? != options[:speed].nil?
-  warn "--funciton and --speed must be specified together. You provide " <<
-       "one without also providing the other."
-  exit 1
-end
-
 begin
   if options[:list]
     devices = LEDENET.discover_devices(expected_devices: 1000)
@@ -136,22 +130,28 @@ begin
 
     api = LEDENET::Api.new(ip)
 
-    api.set_power(options[:on?]) unless options[:on?].nil?
-
     color_params = options.select do |k,_|
       %w{red green blue warm_white}.include?(k.to_s)
     end
-    api.update_color_data(color_params) unless color_params.empty?
 
-    if options[:function] && options[:speed]
-      api.update_function(options[:function], options[:speed])
+    if !options[:on?].nil?
+      api.set_power(options[:on?])
+    end
+
+    if color_params.any?
+      api.update_color_data(color_params)
+    end
+
+    if options[:function]
+      api.update_function(options[:function])
+    end
+
+    if options[:speed]
+      api.update_function_speed(options[:speed])
     end
 
     if options[:print_status?]
-      status = api.current_color_data
-      status = status.merge(is_on: api.on?)
-
-      puts status.to_json
+      puts api.status.to_json
     end
   end
 rescue Exception => e
