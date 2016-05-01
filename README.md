@@ -180,12 +180,12 @@ LEDENET::Functions.all_functions
 ```
 
 ```ruby
-fn = :seven_color_cross_fade
+fn = LEDENET::Functions::SEVEN_COLOR_CROSS_FADE
 speed = 0 # very slow
 
 api.update_function(fn, speed)
 
-api.update_function(fn, 100) # Very fast
+api.update_function(:blue_green_cross_fade, 100) # Very fast
 ```
 
 To quit the function and return to a constant color, simply update a color value:
