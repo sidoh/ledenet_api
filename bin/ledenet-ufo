@@ -70,6 +70,8 @@ opts = OptionParser.new do |opts|
   end
 
   opts.on("-f", "--function [VALUE]", "Set function to VALUE.") do |v|
+    v.upcase!
+
     if !LEDENET::Functions.const_defined?(v)
       warn "Unknown function type: #{v}. Valid function types: \n\t" <<
            "#{LEDENET::Functions.all_functions.join("\n\t")}"
