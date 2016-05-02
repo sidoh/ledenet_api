@@ -181,10 +181,7 @@ LEDENET::Functions.all_functions
 ```
 
 ```ruby
-fn = LEDENET::Functions::SEVEN_COLOR_CROSS_FADE
-speed = 0 # very slow
-
-api.update_function(fn)
+api.update_function(:seven_color_cross_fade)
 api.update_function_speed(100) #very fast
 
 api.update_function_data(
