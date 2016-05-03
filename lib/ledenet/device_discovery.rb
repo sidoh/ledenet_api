@@ -19,6 +19,7 @@ module LEDENET
       expected_devices: 1,
       timeout: 5,
       expected_models: [],
+      expected_hw_addrs: [],
       udp_port: 48899
   }
 
@@ -39,12 +40,17 @@ module LEDENET
 
     discovered_devices = []
     discovered_models = Set.new
+    discovered_hw_addrs = Set.new
     expected_models = Set.new(options[:expected_models])
+    expected_hw_addrs = Set.new(
+      options[:expected_hw_addrs].map { |x| x.gsub(':', '').upcase }
+    )
 
     begin
       Timeout::timeout(options[:timeout]) do
-        while discovered_devices.count < options[:expected_devices] or
-              !expected_models.subset?(discovered_models)
+        while discovered_devices.count < options[:expected_devices] ||
+              !expected_models.subset?(discovered_models) ||
+              !expected_hw_addrs.subset?(discovered_hw_addrs)
           data = send_socket.recv(1024)
 
           device = LEDENET::Device.new(data)
@@ -52,6 +58,7 @@ module LEDENET
           if device.ip and device.hw_addr and device.model
             discovered_devices.push(device)
             discovered_models.add(device.model)
+            discovered_hw_addrs.add(device.hw_addr)
           end
         end
       end

@@ -106,7 +106,7 @@ begin
     row_format = "%16s %18s %20s\n"
     printf row_format, "IP ADDRESS", "HW ADDRESS", "Model #"
 
-    LEDENET.discover_devices.each do |device|
+    devices.each do |device|
       formatted_hwaddr = (0...12).step(2)
         .map { |x| device.hw_addr[x, 2] }
         .join(':')
@@ -119,7 +119,9 @@ begin
     if options[:ip]
       ip = options[:ip]
     elsif options[:hw_addr]
-      r = LEDENET.discover_devices.select { |x| x.hw_addr == options[:hw_addr] }
+      r = LEDENET.discover_devices(expected_hw_addrs: [options[:hw_addr]])
+      r.select! { |x| x.hw_addr == options[:hw_addr] }
+
       if r.empty?
         raise "Couldn't find device with mac addr: #{options[:hw_addr]}"
       end
